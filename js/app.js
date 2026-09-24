@@ -4,6 +4,8 @@
    Bilingual ES/EN with language switcher
    ============================================================ */
 
+(() => {
+'use strict';
 const PHONE = '50687764820';
 const formatPrice = (n) => '₡ ' + n.toLocaleString('es-CR');
 
@@ -16,9 +18,9 @@ const I18N = {
     'nav.contacto': 'Contacto',
     'nav.pedir': 'Pedir ahora',
     'hero.scroll': 'Deslizar',
-    'hero.title1': 'El Mejor',
+    'hero.title1': 'El mejor',
     'hero.onigiri': 'onigiri',
-    'hero.title2': 'Costa&nbsp;Rica.',
+    'hero.title2': 'de Costa Rica.',
     'hero.lede': 'GOHAN nace del oficio japonés del arroz: onigiris premium hechos a mano, rellenos de temporada y café recién servido, en el corazón de Plaza Mundo Escazú.',
     'hero.cta1': 'Descubrir el menú',
     'hero.cta2': 'Nuestra historia',
@@ -110,9 +112,9 @@ const I18N = {
     'nav.contacto': 'Contact',
     'nav.pedir': 'Order now',
     'hero.scroll': 'Scroll',
-    'hero.title1': 'The Best',
+    'hero.title1': 'The best',
     'hero.onigiri': 'onigiri',
-    'hero.title2': 'in&nbsp;Costa&nbsp;Rica.',
+    'hero.title2': 'in Costa Rica.',
     'hero.lede': 'GOHAN is born from the Japanese craft of rice: hand-made premium onigiri, seasonal fillings and freshly brewed coffee, in the heart of Plaza Mundo Escazú.',
     'hero.cta1': 'Explore the menu',
     'hero.cta2': 'Our story',
@@ -199,7 +201,11 @@ const I18N = {
   }
 };
 
-let lang = localStorage.getItem('gohan-lang') || 'es';
+let lang = 'es';
+try {
+  const saved = localStorage.getItem('gohan-lang');
+  if (saved === 'en' || saved === 'es') lang = saved;
+} catch { /* The site also works when browser storage is unavailable. */ }
 const t = (key) => I18N[lang][key] || I18N.es[key] || key;
 
 /* ---------- MENU DATA ---------- */
@@ -272,6 +278,7 @@ const itemDesc = (it) => (typeof it.desc === 'object' ? it.desc[lang] : it.desc)
 const state = {
   view: 'grid',      // grid | detail | extras | summary
   section: null,     // active menu section id
+  currentItem: null,
   qty: 1,
   order: [],         // {id, qty}
   extras: [],        // [id]
@@ -285,13 +292,15 @@ const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
 /* ============================================================
    RENDER — steps
    ============================================================ */
-function setStep(active) {
+function setStep() {
   const map = { grid: 1, detail: 1, extras: 2, summary: 3 };
   const n = map[state.view];
   $$('.step').forEach(el => {
     const k = +el.dataset.step;
     el.classList.toggle('is-active', k === n);
     el.classList.toggle('is-done', k < n && state.view !== 'grid');
+    if (k === n) el.setAttribute('aria-current', 'step');
+    else el.removeAttribute('aria-current');
   });
 }
 
@@ -300,8 +309,6 @@ function setStep(active) {
    ============================================================ */
 const itemNote  = (sec) => (typeof sec.note  === 'object' ? sec.note[lang]  : sec.note);
 const secLabel  = (sec) => (typeof sec.label === 'object' ? sec.label[lang] : sec.label);
-
-const SEC_ICON = { onigiris: '🍙', acompanar: '🥣', postres: '🍮' };
 
 function renderGrid() {
   const grid = $('#viewProducts');
@@ -348,9 +355,12 @@ function renderGrid() {
 }
 
 /* show a section's items as cards */
-function showSectionGrid(sec) {
+function showSectionGrid(sec, options) {
+  if (!sec) return;
+  state.section = sec.id;
+  if (!options?.renderOnly) state.view = 'grid';
   const view = $('#viewProducts');
-  view.className='view view--grid';
+  view.classList.add('view', 'view--grid');
   view.innerHTML = `
     <div class="subhead">
       <span class="subhead__main">
@@ -358,7 +368,7 @@ function showSectionGrid(sec) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>
           <span>${t('menu.back')}</span>
         </button>
-        <h3>${itemName(sec)}</h3>
+        <h3>${secLabel(sec)}</h3>
         <p>${itemNote(sec)}</p>
       </span>
       <span class="subhead__count">${sec.items.length} ${t('menu.items')}</span>
@@ -387,41 +397,43 @@ function showSectionGrid(sec) {
     showViews();
   });
 
-  $$('.card', view).forEach(card => card.addEventListener('click', (e) => {
+  $$('.card', view).forEach(card => card.addEventListener('click', () => {
     state.qty = 1;
     openDetail(card.dataset.id);
   }));
+  if (!options?.renderOnly) showViews(options);
 }
 
 /* ============================================================
    RENDER — detail
    ============================================================ */
-function openDetail(id) {
+function openDetail(id, options) {
   const item = findItem(id);
   if (!item) return;
   const sec = SECTIONS.find(s => s.items.some(i => i.id === id));
   state.view = 'detail';
+  state.currentItem = id;
   const body = $('#detailCard');
   body.innerHTML = `
     <div class="detail__media"><img src="${item.img}" alt="${itemName(item)}" decoding="async"/></div>
     <div class="detail__body">
-      <p class="kicker">${sec ? `${itemName(sec)} · ` : ''}${itemTag(item)}</p>
+      <p class="kicker">${sec ? `${secLabel(sec)} · ` : ''}${itemTag(item)}</p>
       <h3>${itemName(item)}</h3>
       <p class="lead">${itemDesc(item)}</p>
       <p class="detail__price">${formatPrice(item.price)}</p>
       <div class="qty">
-        <label>${t('detail.cantidad')}</label>
+        <span>${t('detail.cantidad')}</span>
         <div class="qty__sep">
-          <button id="qyMinus" aria-label="−">−</button>
-          <output id="qtyOut">1</output>
-          <button id="qyPlus" aria-label="+">+</button>
+          <button id="qyMinus" aria-label="${lang === 'es' ? 'Reducir cantidad' : 'Decrease quantity'}">−</button>
+          <output id="qtyOut" aria-live="polite">${state.qty}</output>
+          <button id="qyPlus" aria-label="${lang === 'es' ? 'Aumentar cantidad' : 'Increase quantity'}">+</button>
         </div>
       </div>
       <div class="detail__actions">
         <button class="btn btn--dark" id="addBtn">${t('detail.add')}</button>
       </div>
     </div>`;
-  showViews();
+  showViews(options);
 
   $('#qyMinus').addEventListener('click', () => { state.qty = Math.max(1, state.qty - 1); $('#qtyOut').textContent = state.qty; });
   $('#qyPlus').addEventListener('click', () => { state.qty += 1; $('#qtyOut').textContent = state.qty; });
@@ -444,22 +456,23 @@ function renderExtras() {
   $('#extrasList').innerHTML = EXTRA_ITEMS.map(x => {
     const it = findItem(x.id);
     return `
-    <div class="extra ${state.extras.includes(x.id) ? 'is-selected' : ''}" data-id="${x.id}">
+    <button type="button" class="extra ${state.extras.includes(x.id) ? 'is-selected' : ''}" data-id="${x.id}" aria-pressed="${state.extras.includes(x.id)}">
       <img class="extra__thumb" src="${it.img}" alt="" loading="lazy" decoding="async"/>
-      <div class="extra__info">
+      <span class="extra__info">
         <b>${itemName(it)}</b><span>${formatPrice(it.price)}</span>
-      </div>
+      </span>
       <span class="extra__toggle">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
       </span>
-    </div>`;
+    </button>`;
   }).join('');
 
   $$('.extra', $('#extrasList')).forEach(el => el.addEventListener('click', () => {
     const id = el.dataset.id;
     const i = state.extras.indexOf(id);
     if (i >= 0) state.extras.splice(i, 1); else state.extras.push(id);
-    renderExtras();
+    el.classList.toggle('is-selected', state.extras.includes(id));
+    el.setAttribute('aria-pressed', String(state.extras.includes(id)));
   }));
 }
 
@@ -492,6 +505,7 @@ function renderSummary() {
 
   $('#totalAmount').textContent = formatPrice(total);
   state.total = total;
+  $('#summarySend').disabled = rows.length === 0;
 
   $$('.s-item__rm').forEach(btn => btn.addEventListener('click', () => {
     const idx = +btn.dataset.idx;
@@ -503,25 +517,34 @@ function renderSummary() {
       if (o) { o.qty -= r.qty; if (o.qty <= 0) state.order = state.order.filter(x => x.id !== r.id); }
     }
     renderSummary();
+    const next = $$('.s-item__rm')[Math.min(idx, rows.length - 2)] || $('#addMore');
+    next.focus({ preventScroll: true });
+    window.GohanMotion?.refresh();
   }));
 }
 
 /* ============================================================
    VIEW SWITCHING
    ============================================================ */
-function showViews() {
+function showViews({ scroll = true, animate = true } = {}) {
   $('#viewProducts').classList.toggle('hidden', state.view !== 'grid');
   $('#viewDetail').classList.toggle('hidden', state.view !== 'detail');
   $('#viewExtras').classList.toggle('hidden', state.view !== 'extras');
   $('#viewSummary').classList.toggle('hidden', state.view !== 'summary');
-  setStep(state.view);
-  if (state.view !== 'grid' && state.view !== 'detail') {
-    $('#menu').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setStep();
+  const active = $({ grid: '#viewProducts', detail: '#viewDetail', extras: '#viewExtras', summary: '#viewSummary' }[state.view]);
+  if (scroll) {
+    active.setAttribute('tabindex', '-1');
+    active.focus({ preventScroll: true });
+    active.scrollIntoView({ behavior: reducedMotion.matches ? 'instant' : 'smooth', block: 'start' });
   }
+  if (animate) window.GohanMotion?.viewChanged(active);
+  window.GohanMotion?.refresh();
 }
 
 /* confirm -> WhatsApp */
 function sendOrder() {
+  if (!state.order.length && !state.extras.length) return;
   const rows = [
     ...state.order.map(o => ({ ...findItem(o.id), qty: o.qty, extra: false })),
     ...state.extras.map(id => ({ ...findItem(id), qty: 1, extra: true }))
@@ -531,7 +554,7 @@ function sendOrder() {
   const total = rows.reduce((t, r) => t + r.price * r.qty, 0);
   msg += `\n\n${t('wa.entrega')}: ${state.delivery === 'local' ? t('wa.deliveryLocal') : t('wa.deliveryEncar')}`;
   msg += `\n${t('wa.total')}: ${formatPrice(total)}`;
-  window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
+  window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
 }
 
 /* ============================================================
@@ -550,41 +573,24 @@ function applyI18n() {
 }
 
 function setLang(next) {
-  if (next === lang) return;
+  if (next === lang || !I18N[next]) return;
   lang = next;
-  localStorage.setItem('gohan-lang', lang);
-  document.documentElement.lang = lang;
-  $$('.lang__btn').forEach(b => b.classList.toggle('is-active', b.dataset.lang === lang));
+  try { localStorage.setItem('gohan-lang', lang); } catch { /* Optional preference. */ }
+  updateLanguageControls();
   applyI18n();
-  renderGrid();
+  if (state.section) showSectionGrid(SECTIONS.find(s => s.id === state.section), { renderOnly: true });
+  else renderGrid();
+  if (state.view === 'detail') openDetail(state.currentItem, { scroll: false, animate: false });
   if (state.view === 'extras') renderExtras();
   if (state.view === 'summary') renderSummary();
+  window.GohanMotion?.refresh();
 }
 
 /* ============================================================
-   NAV + REVEAL + SCROLL
+   NAV + NATIVE SCROLL
    ============================================================ */
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const lenis = !prefersReducedMotion && window.Lenis ? new Lenis({
-  autoRaf: false,
-  smoothWheel: true,
-  syncTouch: false,
-  lerp: 0.085
-}) : null;
-
-if (lenis) {
-  const raf = (time) => {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-  };
-  requestAnimationFrame(raf);
-  $$('a[href^="#"]').forEach(link => link.addEventListener('click', (event) => {
-    const target = document.querySelector(link.getAttribute('href'));
-    if (!target) return;
-    event.preventDefault();
-    lenis.scrollTo(target, { offset: -24, duration: 1.15 });
-  }));
-}
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const mobileNav = window.matchMedia('(max-width: 720px)');
 
 const nav = $('#nav');
 const onScroll = () => nav.classList.toggle('is-scrolled', window.scrollY > 30);
@@ -593,26 +599,78 @@ onScroll();
 
 const burger = $('#burger');
 const navLinks = $('#navLinks');
-burger.addEventListener('click', () => {
-  const open = navLinks.classList.toggle('is-open');
+const navBackdrop = $('#navBackdrop');
+let menuOpen = false;
+
+function updateLanguageControls() {
+  document.documentElement.lang = lang;
+  $$('.lang__btn').forEach(button => {
+    const active = button.dataset.lang === lang;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+  burger.setAttribute('aria-label', lang === 'es'
+    ? (menuOpen ? 'Cerrar menú' : 'Abrir menú')
+    : (menuOpen ? 'Close menu' : 'Open menu'));
+}
+
+function setMenu(open, restoreFocus = false) {
+  menuOpen = open && mobileNav.matches;
+  open = menuOpen;
+  navLinks.classList.toggle('is-open', open);
   burger.classList.toggle('is-open', open);
-  burger.setAttribute('aria-expanded', open);
+  burger.setAttribute('aria-expanded', String(open));
+  navLinks.inert = mobileNav.matches && !open;
+  navBackdrop.hidden = !open;
+  $$('#main, .footer, .wa, .nav__brand, #langToggle').forEach(element => { element.inert = open; });
+  document.body.style.overflow = open ? 'hidden' : '';
+  updateLanguageControls();
+  if (open) $('a', navLinks).focus({ preventScroll: true });
+  else if (restoreFocus) burger.focus({ preventScroll: true });
+}
+
+burger.addEventListener('click', () => setMenu(!menuOpen, menuOpen));
+navBackdrop.addEventListener('click', () => setMenu(false, true));
+mobileNav.addEventListener('change', () => setMenu(false));
+document.addEventListener('keydown', event => {
+  if (!menuOpen) return;
+  if (event.key === 'Escape') { event.preventDefault(); setMenu(false, true); }
+  if (event.key === 'Tab') {
+    const controls = [...$$('a', navLinks), burger];
+    const index = controls.indexOf(document.activeElement);
+    const next = (index + (event.shiftKey ? -1 : 1) + controls.length) % controls.length;
+    event.preventDefault();
+    controls[next].focus();
+  }
 });
-$$('.nav__links a').forEach(a => a.addEventListener('click', () => {
-  navLinks.classList.remove('is-open');
-  burger.classList.remove('is-open');
-  burger.setAttribute('aria-expanded', 'false');
+setMenu(false);
+
+// Only anchor clicks are smoothed. Wheel and touch scrolling remain native.
+$$('a[href^="#"]').forEach(link => link.addEventListener('click', event => {
+  const target = document.getElementById(link.hash.slice(1));
+  if (!target) return;
+  event.preventDefault();
+  setMenu(false);
+  target.setAttribute('tabindex', '-1');
+  target.focus({ preventScroll: true });
+  target.scrollIntoView({ behavior: reducedMotion.matches ? 'instant' : 'smooth', block: 'start' });
+  history.replaceState(null, '', link.hash);
 }));
+
+const sectionObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    $$('.nav__links a').forEach(link => {
+      if (link.hash === `#${entry.target.id}`) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  });
+}, { rootMargin: '-15% 0px -60% 0px', threshold: 0 });
+$$('main > section[id]').forEach(section => sectionObserver.observe(section));
 
 /* language switcher */
 $$('.lang__btn').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
-document.documentElement.lang = lang;
-
-/* reveal on scroll */
-const revealObs = new IntersectionObserver((entries) => {
-  entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); revealObs.unobserve(en.target); } });
-}, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-$$('[data-reveal]').forEach(el => revealObs.observe(el));
+updateLanguageControls();
 
 /* year */
 $('#year').textContent = new Date().getFullYear();
@@ -633,4 +691,6 @@ $('#addMore').addEventListener('click', () => { state.view = 'grid'; showViews()
    ============================================================ */
 applyI18n();
 renderGrid();
-showViews();
+showViews({ scroll: false, animate: false });
+window.GohanMotion?.init();
+})();

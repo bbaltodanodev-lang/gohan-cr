@@ -55,7 +55,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="preload" as="image" href="images/hero.jpg" fetchpriority="high" />
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css?v=20260923.2" />
 
   <!-- Structured data: Restaurant -->
   <script type="application/ld+json">
@@ -134,16 +134,20 @@
         <button class="lang__btn" data-lang="en">EN</button>
       </div>
       <a class="btn btn--dark nav__cta" href="#menu" data-i18n="nav.pedir">Pedir ahora</a>
-      <button class="nav__burger" id="burger" aria-label="Abrir menú" aria-expanded="false">
+      <button class="nav__burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="navLinks">
         <span></span><span></span>
       </button>
     </div>
   </header>
+  <div class="nav-backdrop" id="navBackdrop" hidden></div>
 
+  <main id="main">
   <!-- ==================== HERO ==================== -->
   <section class="hero" id="hero">
     <div class="hero__media">
-      <img src="images/hero.jpg" width="1200" height="675" fetchpriority="high" alt="Onigiri de arroz japonés servido en plato cerámico — GOHAN, Escazú" />
+      <div class="hero__frame">
+        <img src="images/hero.jpg" width="1200" height="675" fetchpriority="high" alt="Onigiri de arroz japonés servido en plato cerámico — GOHAN, Escazú" />
+      </div>
       <span class="hero__seal">
         <svg viewBox="0 0 120 120" aria-hidden="true">
           <circle cx="60" cy="60" r="57" fill="#b9332a" fill-opacity="0.96"/>
@@ -152,12 +156,15 @@
         </svg>
       </span>
       <div class="hero__flourish" aria-hidden="true"></div>
+      <div class="hero__caption"><span aria-hidden="true">おにぎり</span><span data-i18n="story.fig">Hecho a mano, al momento.</span></div>
     </div>
 
     <div class="hero__content">
+      <p class="kicker hero__eyebrow"><span></span>Plaza Mundo Escazú · Costa Rica</p>
       <h1 class="hero__title">
-        <span data-i18n="hero.title1">El Mejor</span> <em data-i18n="hero.onigiri">onigiri</em> de<br/>
-        <span data-i18n="hero.title2">Costa&nbsp;Rica.</span>
+        <span class="hero__line" data-i18n="hero.title1">El mejor</span>
+        <em data-i18n="hero.onigiri">onigiri</em>
+        <span class="hero__location" data-i18n="hero.title2">de Costa Rica.</span>
       </h1>
       <p class="hero__lede" data-i18n="hero.lede">
         GOHAN nace del oficio japonés del arroz: onigiris premium hechos a mano,
@@ -182,6 +189,12 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>
     </a>
   </section>
+
+  <div class="craft-strip" aria-label="Nuestra cocina">
+    <p><span>01 /</span><b data-i18n="story.pr1t">Arroz al punto</b></p>
+    <p><span>02 /</span><b data-i18n="story.pr2t">Hecho a mano</b></p>
+    <p><span>03 /</span><b data-i18n="story.pr3t">Sabor de temporada</b></p>
+  </div>
 
   <!-- ==================== MENÚ ==================== -->
   <section class="menu" id="menu">
@@ -365,6 +378,7 @@
     </div>
   </section>
 
+  </main>
   <!-- ==================== FOOTER ==================== -->
   <footer class="footer">
     <div class="footer__brand">
@@ -408,7 +422,9 @@
     </svg>
   </a>
 
-  <script src="https://unpkg.com/lenis@1.3.11/dist/lenis.min.js"></script>
-  <script src="js/app.js"></script>
+  <script defer src="js/vendor/gsap.min.js"></script>
+  <script defer src="js/vendor/ScrollTrigger.min.js"></script>
+  <script defer src="js/animations.js?v=20260923.2"></script>
+  <script defer src="js/app.js?v=20260923.2"></script>
 </body>
 </html>

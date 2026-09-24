@@ -1,0 +1,70 @@
+# GOHAN · Onigiri
+
+Web estática en HTML, CSS y JavaScript. Se conserva el contenido, las fotografías,
+el selector ES/EN y el pedido por WhatsApp del proyecto original.
+
+## Desarrollo
+
+Requiere Node.js 22.13 o superior y Python 3 para el servidor local.
+
+```sh
+npm ci
+npm run dev
+```
+
+Abrir http://127.0.0.1:4060/. También funciona con Live Server de VS Code.
+El servidor de desarrollo escucha únicamente en la computadora local.
+
+## Verificación
+
+```sh
+npm run check
+npm test
+```
+
+`check` revisa sintaxis de JavaScript y CSS, IDs duplicados, anclas y recursos
+locales del HTML. Las pruebas cubren el flujo de pedido, cantidades y total,
+ES/EN sin perder el producto, navegación móvil, movimiento reducido y el
+funcionamiento sin GSAP o sin almacenamiento del navegador.
+
+Las pruebas DOM no sustituyen una revisión visual en navegador. Se comprobó
+la interfaz en anchos de 320, 390, 768 y 1280 píxeles.
+
+## Animación y publicación
+
+GSAP 3.15.0 y ScrollTrigger se sirven desde `js/vendor/`, sin depender de un CDN.
+Se usan entradas secuenciales, revelados al desplazarse y transiciones del menú.
+El paralaje de la foto principal solo se activa en escritorio con puntero preciso.
+Se respeta `prefers-reduced-motion`. El scroll de rueda y táctil sigue siendo nativo.
+
+Después de actualizar la dependencia GSAP, regenerar los archivos con:
+
+```sh
+npm run vendor
+```
+
+Licencia de GSAP: https://gsap.com/standard-license/.
+Los archivos distribuidos conservan sus cabeceras de licencia.
+
+No hay compilación: para el alojamiento estático incluir `index.html`, `css/`,
+`js/` (también `js/vendor/`), `images/`, `robots.txt` y `sitemap.xml`.
+No es necesario publicar `node_modules/`, `tests/`, `scripts/`, ni archivos de Git.
+Al publicar nuevas versiones de CSS o JS, actualizar el parámetro `v` de sus
+referencias en el HTML para evitar que una caché siga mostrando la versión anterior.
+
+## Historial y recuperación
+
+Se creó un repositorio Git local antes de cambiar el diseño. El punto original
+está etiquetado como `antes-css-gsap`. Los cambios no se han subido ni desplegado.
+
+Para ver las diferencias:
+
+```sh
+git diff antes-css-gsap -- index.html css/styles.css js/app.js
+git log --oneline --decorate
+```
+
+Para inspeccionar el estado anterior sin sobrescribir el actual, se puede crear
+otra carpeta con `git worktree add ../gohan-web-antes antes-css-gsap` (la carpeta
+de destino debe estar disponible). Antes de deshacer cambios futuros, guardarlos
+en un commit y usar `git revert` sobre el commit concreto que se quiera deshacer.

@@ -1,0 +1,18 @@
+{
+  "name": "gohan-onigiri",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "python -m http.server 4060 --bind 127.0.0.1",
+    "vendor": "node scripts/vendor-gsap.mjs",
+    "check": "node --check js/app.js && node --check js/animations.js && node --check scripts/vendor-gsap.mjs && node scripts/check-static.mjs",
+    "test": "node --test tests/app.test.mjs"
+  },
+  "dependencies": {
+    "gsap": "3.15.0"
+  },
+  "devDependencies": {
+    "css-tree": "^3.2.1",
+    "jsdom": "^29.1.1"
+  }
+}
