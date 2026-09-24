@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <linearGradient id="nori" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f2a23"/>
+      <stop offset="1" stop-color="#101511"/>
+    </linearGradient>
+    <linearGradient id="rice" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eee7da"/>
+    </linearGradient>
+    <radialGradient id="bg" cx="0.5" cy="0.42" r="0.62">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f3ece1"/>
+    </radialGradient>
+  </defs>
+
+  <!-- circular emblem -->
+  <circle cx="120" cy="120" r="118" fill="#b9332a"/>
+  <circle cx="120" cy="120" r="108" fill="url(#bg)"/>
+  <circle cx="120" cy="120" r="104" fill="none" stroke="#b9332a" stroke-width="2" opacity="0.35" stroke-dasharray="2 6"/>
+
+  <!-- nori -->
+  <path d="M120 34 L50 176 L190 176 Z" fill="url(#nori)"/>
+
+  <!-- rice grains -->
+  <path d="M120 42 L56 170 L184 170 Z" fill="url(#rice)"/>
+  <g fill="#d7cfbe" opacity="0.8">
+    <ellipse cx="120" cy="74" rx="4.5" ry="3" transform="rotate(-12 120 74)"/>
+    <ellipse cx="92" cy="96" rx="4" ry="2.8" transform="rotate(8 92 96)"/>
+    <ellipse cx="148" cy="96" rx="4" ry="2.8" transform="rotate(14 148 96)"/>
+    <ellipse cx="120" cy="112" rx="4" ry="2.8" transform="rotate(-6 120 112)"/>
+    <ellipse cx="100" cy="128" rx="4" ry="2.8" transform="rotate(10 100 128)"/>
+    <ellipse cx="140" cy="128" rx="4" ry="2.8" transform="rotate(-14 140 128)"/>
+  </g>
+</svg>
