@@ -76,9 +76,8 @@
     viewChanged(document.querySelector('#viewProducts'), true);
     reduced.addEventListener('change', () => { menuContext?.revert(); menuContext = null; refresh(); });
     document.fonts?.ready.then(refresh);
-    document.addEventListener('load', event => {
-      if (event.target instanceof HTMLImageElement) refresh();
-    }, true);
+    // Image frames already reserve their size in CSS; lazy image loads need no
+    // extra refresh that could interrupt an in-progress native scroll.
     refresh();
   }
 

@@ -106,3 +106,29 @@ test('un idioma guardado inválido no rompe el arranque', t => {
   assert.equal(ui.window.document.documentElement.lang, 'es');
   assert.equal(ui.$('[data-lang="es"]').getAttribute('aria-pressed'), 'true');
 });
+
+test('se puede retomar el pedido sin agregar productos nuevos', t => {
+  const ui = setup(t); ui.start();
+  assert.equal(ui.$('#resumeOrder').hidden, true);
+  ui.click('[data-section="onigiris"] .add'); ui.click('[data-id="butakaku"] .add');
+  ui.click('#addBtn');
+  assert.equal(ui.$('#resumeOrder').hidden, false);
+  assert.equal(ui.$('#orderCount').textContent, '1');
+  ui.click('.extra[data-id="kimchi"]');
+  assert.equal(ui.$('#orderCount').textContent, '2');
+  ui.click('#extrasBack'); ui.click('#resumeOrder');
+  assert.ok(!ui.$('#viewSummary').classList.contains('hidden'));
+  assert.equal(ui.$('#orderSubtotal').textContent.replace(/\s/g, ''), '₡4576');
+  ui.click('.s-item__rm'); ui.click('.s-item__rm');
+  assert.equal(ui.$('#resumeOrder').hidden, true);
+  assert.match(ui.$('.summary__empty').textContent, /pedido está vacío/);
+});
+
+test('el resumen identifica un postre como postre y no como onigiri', t => {
+  const ui = setup(t); ui.start();
+  ui.click('[data-section="postres"] .add'); ui.click('[data-id="castella"] .add');
+  ui.click('#addBtn'); ui.click('#extrasNext');
+  assert.equal(ui.$('.s-item__body small').textContent, 'Postres');
+  ui.click('[data-lang="en"]');
+  assert.equal(ui.$('.s-item__body small').textContent, 'Desserts');
+});

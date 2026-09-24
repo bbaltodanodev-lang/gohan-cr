@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 640" role="img" aria-labelledby="title desc">
+  <title id="title">Castella de matcha — ilustración</title>
+  <desc id="desc">Ilustración de una porción de queque verde de matcha con corteza dorada sobre un plato.</desc>
+  <rect width="800" height="640" fill="#f6f1e7"/>
+  <circle cx="690" cy="100" r="230" fill="#e6e8da" opacity=".6"/>
+  <circle cx="110" cy="580" r="220" fill="#e7dcc6" opacity=".4"/>
+  <ellipse cx="404" cy="402" rx="235" ry="46" fill="#ded6c7" opacity=".45"/>
+  <ellipse cx="400" cy="381" rx="224" ry="50" fill="#fffdf8" stroke="#c9c2b2" stroke-width="3"/>
+  <ellipse cx="400" cy="378" rx="193" ry="34" fill="none" stroke="#e7e0d2" stroke-width="2"/>
+  <g stroke="#485136" stroke-width="3" stroke-linejoin="round">
+    <path d="M257 245 460 273 460 392 257 357Z" fill="#9aa65e"/>
+    <path d="M460 273 560 216 560 340 460 392Z" fill="#728449"/>
+    <path d="M257 245 359 192 560 216 460 273Z" fill="#765333"/>
+    <path d="M257 245 460 273 460 287 257 259Z" fill="#8c653f" stroke="none"/>
+    <path d="M460 273 560 216 560 230 460 287Z" fill="#67472e" stroke="none"/>
+  </g>
+  <g fill="#d5dca2" opacity=".65">
+    <circle cx="282" cy="283" r="3"/><circle cx="325" cy="303" r="4"/>
+    <circle cx="370" cy="295" r="3"/><circle cx="415" cy="316" r="4"/>
+    <circle cx="292" cy="331" r="4"/><circle cx="350" cy="343" r="3"/>
+    <circle cx="397" cy="350" r="4"/><circle cx="433" cy="365" r="3"/>
+  </g>
+  <text x="400" y="494" text-anchor="middle" font-family="Georgia, serif" font-size="48" fill="#3a4a3b">抹茶</text>
+  <text x="400" y="553" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" letter-spacing="7" fill="#3d372f">CASTELLA MATCHA</text>
+</svg>

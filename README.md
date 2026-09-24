@@ -2,6 +2,10 @@
 
 Web estática en HTML, CSS y JavaScript. Se conserva el contenido, las fotografías,
 el selector ES/EN y el pedido por WhatsApp del proyecto original.
+Las tarjetas de categorías usan una fotografía principal y un contador de platos.
+El acceso «Tu pedido» permite retomar el resumen con sus cantidades y subtotal.
+La imagen de onigiri que estaba asignada a Castella de Matcha se reemplazó por
+una ilustración SVG identificada como tal; no se eliminó la fotografía original.
 
 ## Desarrollo
 

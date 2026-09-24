@@ -24,5 +24,10 @@ for (const element of dom.window.document.querySelectorAll('a[href^="#"]')) {
   if (!ids.has(element.hash.slice(1))) errors.push(`Ancla inexistente: ${element.hash}`);
 }
 dom.window.close();
+const app = await readFile(new URL('js/app.js', root), 'utf8');
+for (const [, path] of app.matchAll(/img: '([^']+)'/g)) {
+  try { await access(new URL(path, root)); }
+  catch { errors.push(`Imagen de menú no encontrada: ${path}`); }
+}
 if (errors.length) throw new Error(errors.join('\n'));
 console.log('CSS, IDs, anclas y recursos estáticos: correctos.');

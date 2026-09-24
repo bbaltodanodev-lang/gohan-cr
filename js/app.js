@@ -39,6 +39,7 @@ const I18N = {
     'menu.ver': 'Ver',
     'menu.agregar': 'Agregar',
     'menu.items': 'platos',
+    'menu.illustration': 'Ilustración',
     'extras.title': 'Acompaña tu pedido',
     'extras.desc': 'Fermentos, encurtidos, postres y sopas para completar la experiencia.',
     'extras.back': 'Volver',
@@ -48,7 +49,8 @@ const I18N = {
     'summary.addMore': '+ Agregar otro producto',
     'summary.delivery': 'Forma de entrega',
     'summary.delLocal': 'Retiro en local',
-    'summary.delLocalTxt': 'Pásalo a dejarlo listo en Plaza Mundo Escazú.',
+    'summary.delLocalTxt': 'Retira tu pedido en Plaza Mundo Escazú.',
+    'summary.empty': 'Tu pedido está vacío. Agrega un producto para comenzar.',
     'summary.delFlash': 'Por encargo',
     'summary.delFlashTxt': 'Pedido por Uber Eats o coordinación aparte.',
     'summary.total': 'Total estimado',
@@ -133,6 +135,7 @@ const I18N = {
     'menu.ver': 'View',
     'menu.agregar': 'Add',
     'menu.items': 'items',
+    'menu.illustration': 'Illustration',
     'extras.title': 'Add to your order',
     'extras.desc': 'Ferments, pickles, desserts and soups to complete the experience.',
     'extras.back': 'Back',
@@ -143,6 +146,7 @@ const I18N = {
     'summary.delivery': 'Delivery method',
     'summary.delLocal': 'Pickup in store',
     'summary.delLocalTxt': 'We will have it ready at Plaza Mundo Escazú.',
+    'summary.empty': 'Your order is empty. Add a product to get started.',
     'summary.delFlash': 'Delivery',
     'summary.delFlashTxt': 'Order via Uber Eats or arranged separately.',
     'summary.total': 'Estimated total',
@@ -255,7 +259,7 @@ const SECTIONS = [
         img: 'images/menu/castella-real.jpg' },
       { id: 'castella-matcha', name: { es: 'Castella de Matcha', en: 'Matcha Castella' }, price: 3480, tag: { es: 'Postre', en: 'Dessert' },
         desc: { es: 'Queque de matcha súper esponjoso.', en: 'Super fluffy matcha cake.' },
-        img: 'images/menu/castella_matcha.jpg' }
+        img: 'images/menu/castella-matcha.svg' }
     ]
   }
 ];
@@ -313,25 +317,12 @@ const secLabel  = (sec) => (typeof sec.label === 'object' ? sec.label[lang] : se
 function renderGrid() {
   const grid = $('#viewProducts');
   grid.innerHTML = SECTIONS.map(sec => {
-    const photoItems = sec.items.filter(i => !i.img.endsWith('.svg'));
-    const primary    = photoItems[0] || sec.items[0];
-    const secondary  = photoItems[1] || null;
-    const tertiary   = photoItems[2] || null;
-    const iName = (it) => (typeof it.name === 'object' ? it.name[lang] : it.name);
-
-    const sideCol = secondary ? `
-      <div class="card__col card__col--side">
-        <img src="${secondary.img}" alt="${iName(secondary)} — GOHAN" loading="lazy" decoding="async"/>
-        ${tertiary ? `<img src="${tertiary.img}" alt="${iName(tertiary)} — GOHAN" loading="lazy" decoding="async"/>` : ''}
-      </div>` : '';
-
+    const primary = sec.items.find(item => !item.img.endsWith('.svg')) || sec.items[0];
     return `
     <div class="card card--cat" data-section="${sec.id}">
-      <div class="card__media ${secondary ? 'card__media--collage' : ''}">
-        <div class="card__col card__col--main">
-          <img src="${primary.img}" alt="${secLabel(sec)} — GOHAN" loading="lazy" decoding="async"/>
-        </div>
-        ${sideCol}
+      <div class="card__media">
+        <img src="${primary.img}" alt="${secLabel(sec)} — GOHAN" loading="lazy" decoding="async"/>
+        <span class="card__count">${sec.items.length} ${t('menu.items')}</span>
       </div>
       <div class="card__body">
         <h3>${secLabel(sec)}</h3>
@@ -340,7 +331,7 @@ function renderGrid() {
       <div class="card__foot">
         <span class="card__price"><small>${t('menu.desde')}</small> ${formatPrice(Math.min(...sec.items.map(i => i.price)))}</span>
         <button class="add" data-section="${sec.id}" aria-label="${t('menu.ver')} ${secLabel(sec)}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg>
         </button>
       </div>
     </div>`;
@@ -363,20 +354,21 @@ function showSectionGrid(sec, options) {
   view.classList.add('view', 'view--grid');
   view.innerHTML = `
     <div class="subhead">
-      <span class="subhead__main">
+      <div class="subhead__main">
         <button class="back--grid" id="backToSections" aria-label="${t('menu.back')}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>
           <span>${t('menu.back')}</span>
         </button>
         <h3>${secLabel(sec)}</h3>
         <p>${itemNote(sec)}</p>
-      </span>
+      </div>
       <span class="subhead__count">${sec.items.length} ${t('menu.items')}</span>
     </div>
     ${sec.items.map(item => `
     <article class="card" data-id="${item.id}">
       <div class="card__media">
         <img src="${item.img}" alt="${itemName(item)} — GOHAN" loading="lazy" decoding="async"/>
+        ${item.img.endsWith('.svg') ? `<span class="card__count">${t('menu.illustration')}</span>` : ''}
       </div>
       <div class="card__body">
         <h3>${itemName(item)}</h3>
@@ -415,7 +407,10 @@ function openDetail(id, options) {
   state.currentItem = id;
   const body = $('#detailCard');
   body.innerHTML = `
-    <div class="detail__media"><img src="${item.img}" alt="${itemName(item)}" decoding="async"/></div>
+    <div class="detail__media">
+      <img src="${item.img}" alt="${itemName(item)}" decoding="async"/>
+      ${item.img.endsWith('.svg') ? `<span class="card__count">${t('menu.illustration')}</span>` : ''}
+    </div>
     <div class="detail__body">
       <p class="kicker">${sec ? `${secLabel(sec)} · ` : ''}${itemTag(item)}</p>
       <h3>${itemName(item)}</h3>
@@ -473,6 +468,7 @@ function renderExtras() {
     if (i >= 0) state.extras.splice(i, 1); else state.extras.push(id);
     el.classList.toggle('is-selected', state.extras.includes(id));
     el.setAttribute('aria-pressed', String(state.extras.includes(id)));
+    updateOrderIndicator();
   }));
 }
 
@@ -484,11 +480,25 @@ function goSummary() {
   renderSummary();
   showViews();
 }
-function renderSummary() {
-  const rows = [
+function orderRows() {
+  return [
     ...state.order.map(o => ({ ...findItem(o.id), qty: o.qty, extra: false })),
     ...state.extras.map(id => ({ ...findItem(id), qty: 1, extra: true }))
   ];
+}
+
+function updateOrderIndicator() {
+  const rows = orderRows();
+  const count = rows.reduce((sum, row) => sum + row.qty, 0);
+  const total = rows.reduce((sum, row) => sum + row.price * row.qty, 0);
+  $('#resumeOrder').hidden = count === 0;
+  $('#orderCount').textContent = count;
+  $('#orderSubtotal').textContent = formatPrice(total);
+  $('#resumeOrder').setAttribute('aria-label', `${t('summary.title')}: ${count}, ${formatPrice(total)}`);
+}
+
+function renderSummary() {
+  const rows = orderRows();
   const total = rows.reduce((t, r) => t + r.price * r.qty, 0);
 
   $('#summaryItems').innerHTML = rows.map((r, idx) => `
@@ -496,16 +506,17 @@ function renderSummary() {
       <span class="s-item__q">×${r.qty}</span>
       <span class="s-item__body">
         <b>${itemName(r)}</b>
-        <small>${r.extra ? t('summary.acomp') : t('summary.onigiri')}</small>
+        <small>${r.extra ? t('summary.acomp') : secLabel(SECTIONS.find(sec => sec.items.some(item => item.id === r.id)))}</small>
       </span>
       <span class="s-item__price">${formatPrice(r.price * r.qty)}</span>
       <button class="s-item__rm" data-idx="${idx}">${t('summary.quitar')}</button>
     </div>
-  `).join('');
+  `).join('') || `<p class="summary__empty">${t('summary.empty')}</p>`;
 
   $('#totalAmount').textContent = formatPrice(total);
   state.total = total;
   $('#summarySend').disabled = rows.length === 0;
+  updateOrderIndicator();
 
   $$('.s-item__rm').forEach(btn => btn.addEventListener('click', () => {
     const idx = +btn.dataset.idx;
@@ -532,23 +543,27 @@ function showViews({ scroll = true, animate = true } = {}) {
   $('#viewExtras').classList.toggle('hidden', state.view !== 'extras');
   $('#viewSummary').classList.toggle('hidden', state.view !== 'summary');
   setStep();
+  updateOrderIndicator();
   const active = $({ grid: '#viewProducts', detail: '#viewDetail', extras: '#viewExtras', summary: '#viewSummary' }[state.view]);
+  if (animate) window.GohanMotion?.viewChanged(active);
+  window.GohanMotion?.refresh();
   if (scroll) {
     active.setAttribute('tabindex', '-1');
     active.focus({ preventScroll: true });
-    active.scrollIntoView({ behavior: reducedMotion.matches ? 'instant' : 'smooth', block: 'start' });
+    // Refresh GSAP's positions before starting the browser's smooth scroll.
+    // A refresh during that scroll can restore the old position and hide the heading.
+    requestAnimationFrame(() => {
+      if (!active.classList.contains('hidden')) {
+        active.scrollIntoView({ behavior: reducedMotion.matches ? 'instant' : 'smooth', block: 'start' });
+      }
+    });
   }
-  if (animate) window.GohanMotion?.viewChanged(active);
-  window.GohanMotion?.refresh();
 }
 
 /* confirm -> WhatsApp */
 function sendOrder() {
   if (!state.order.length && !state.extras.length) return;
-  const rows = [
-    ...state.order.map(o => ({ ...findItem(o.id), qty: o.qty, extra: false })),
-    ...state.extras.map(id => ({ ...findItem(id), qty: 1, extra: true }))
-  ];
+  const rows = orderRows();
   let msg = t('wa.order') + '\n';
   rows.forEach(r => { msg += `\n• ${r.qty} × ${itemName(r)} — ${formatPrice(r.price * r.qty)}`; });
   const total = rows.reduce((t, r) => t + r.price * r.qty, 0);
@@ -583,6 +598,7 @@ function setLang(next) {
   if (state.view === 'detail') openDetail(state.currentItem, { scroll: false, animate: false });
   if (state.view === 'extras') renderExtras();
   if (state.view === 'summary') renderSummary();
+  updateOrderIndicator();
   window.GohanMotion?.refresh();
 }
 
@@ -684,6 +700,7 @@ $('#extrasBack').addEventListener('click', () => { state.view = 'grid'; showView
 $('#extrasNext').addEventListener('click', goSummary);
 $('#summaryBack').addEventListener('click', goExtras);
 $('#summarySend').addEventListener('click', sendOrder);
+$('#resumeOrder').addEventListener('click', goSummary);
 $('#addMore').addEventListener('click', () => { state.view = 'grid'; showViews(); });
 
 /* ============================================================

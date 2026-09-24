@@ -55,7 +55,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="preload" as="image" href="images/hero.jpg" fetchpriority="high" />
-  <link rel="stylesheet" href="css/styles.css?v=20260923.2" />
+  <link rel="stylesheet" href="css/styles.css?v=20260924.1" />
 
   <!-- Structured data: Restaurant -->
   <script type="application/ld+json">
@@ -206,6 +206,13 @@
         listo para retirar o viajar por encargo.
       </p>
 
+      <button class="order-chip" id="resumeOrder" hidden>
+        <span class="order-chip__count" id="orderCount">0</span>
+        <span data-i18n="summary.title">Tu pedido</span>
+        <span class="order-chip__price" id="orderSubtotal">₡ 0</span>
+        <span aria-hidden="true">↗</span>
+      </button>
+
       <div class="steps" id="steps" aria-label="Progreso del pedido">
         <div class="step is-active" data-step="1">
           <i>01</i><span data-i18n="menu.step1">Elegir</span>
@@ -257,7 +264,7 @@
           <legend data-i18n="summary.delivery">Forma de entrega</legend>
           <label>
             <input type="radio" name="delivery" value="local" checked />
-            <span><b data-i18n="summary.delLocal">Retiro en local</b><small data-i18n="summary.delLocalTxt">Pásalo a dejarlo listo en Plaza Mundo Escazú.</small></span>
+            <span><b data-i18n="summary.delLocal">Retiro en local</b><small data-i18n="summary.delLocalTxt">Retira tu pedido en Plaza Mundo Escazú.</small></span>
           </label>
           <label>
             <input type="radio" name="delivery" value="flash" />
@@ -424,7 +431,7 @@
 
   <script defer src="js/vendor/gsap.min.js"></script>
   <script defer src="js/vendor/ScrollTrigger.min.js"></script>
-  <script defer src="js/animations.js?v=20260923.2"></script>
-  <script defer src="js/app.js?v=20260923.2"></script>
+  <script defer src="js/animations.js?v=20260924.2"></script>
+  <script defer src="js/app.js?v=20260924.2"></script>
 </body>
 </html>
