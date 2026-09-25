@@ -45,7 +45,7 @@
 
       // A single entrance sequence, without splitting text or hiding the page.
       gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.85 } })
-        .from('.hero__frame', { autoAlpha: 0, y: 28, clearProps: 'all' }, 0)
+        .from('.hero__media', { autoAlpha: 0, y: 28, clearProps: 'all' }, 0)
         .from('.hero__eyebrow, .hero__title, .hero__lede, .hero__cta, .hero__meta', {
           autoAlpha: 0, y: 20, stagger: 0.09, clearProps: 'opacity,visibility,transform'
         }, 0.12)
@@ -65,13 +65,71 @@
         scrollTrigger: { trigger: '.craft-strip', start: 'top 92%', once: true }
       });
 
-      // No scrub/parallax on touch screens, where native scrolling takes priority.
+      const scene = document.querySelector('.hero__scene');
+      const tilt = document.querySelector('.hero__tilt');
+      const shine = document.querySelector('.hero__shine');
+      let removePointerListeners = () => {};
+
+      // Independent layers keep entrance, floating and pointer transforms apart.
+      gsap.set(tilt, { rotationX: 3, rotationY: -6, transformOrigin: '50% 50%' });
+      gsap.set(shine, { xPercent: -12, x: 0 });
       if (context.conditions.desktop) {
-        gsap.fromTo('.hero__frame > img', { yPercent: -3, scale: 1.08 }, {
-          yPercent: 3, scale: 1.08, ease: 'none',
-          scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.8 }
+        const rotateX = gsap.quickTo(tilt, 'rotationX', { duration: 0.7, ease: 'power3.out' });
+        const rotateY = gsap.quickTo(tilt, 'rotationY', { duration: 0.7, ease: 'power3.out' });
+        const lightX = gsap.quickTo(shine, 'xPercent', { duration: 0.8, ease: 'power3.out' });
+        const move = event => {
+          if (event.pointerType === 'touch') return;
+          const bounds = scene.getBoundingClientRect();
+          const x = gsap.utils.clamp(-1, 1, (event.clientX - bounds.left) / bounds.width * 2 - 1);
+          const y = gsap.utils.clamp(-1, 1, (event.clientY - bounds.top) / bounds.height * 2 - 1);
+          rotateX(3 - y * 5);
+          rotateY(-6 + x * 7);
+          lightX(x * 14);
+        };
+        const leave = () => { rotateX(3); rotateY(-6); lightX(-12); };
+        scene.addEventListener('pointermove', move, { passive: true });
+        scene.addEventListener('pointerleave', leave);
+        removePointerListeners = () => {
+          scene.removeEventListener('pointermove', move);
+          scene.removeEventListener('pointerleave', leave);
+        };
+      } else {
+        // ScrollTrigger observes native scrolling; no touch or wheel interception.
+        gsap.fromTo(tilt, { rotationX: 4, rotationY: -5 }, {
+          rotationX: -4, rotationY: 5, ease: 'none',
+          scrollTrigger: { trigger: scene, start: 'top bottom', end: 'bottom top', scrub: 0.8 }
         });
       }
+
+      const floating = gsap.to(scene, {
+        y: -8, duration: 3.4, repeat: -1, yoyo: true, ease: 'sine.inOut', paused: true
+      });
+      const scrollHint = gsap.to('.hero__scroll svg', {
+        y: 4, duration: 1.1, repeat: -1, yoyo: true, ease: 'sine.inOut', paused: true
+      });
+      let heroVisible = false;
+      const syncPlayback = () => {
+        const paused = !heroVisible || document.hidden;
+        floating.paused(paused);
+        scrollHint.paused(paused || !context.conditions.desktop);
+      };
+      const visibility = ScrollTrigger.create({
+        trigger: '.hero', start: 'top bottom', end: 'bottom top',
+        onToggle: self => { heroVisible = self.isActive; syncPlayback(); }
+      });
+      heroVisible = visibility.isActive;
+      syncPlayback();
+      document.addEventListener('visibilitychange', syncPlayback);
+
+      gsap.fromTo('.contact__glyph', { rotationY: -25, rotationZ: -10, yPercent: -8 }, {
+        rotationY: 25, rotationZ: 8, yPercent: 8, ease: 'none',
+        scrollTrigger: { trigger: '.contact', start: 'top bottom', end: 'bottom top', scrub: 1 }
+      });
+
+      return () => {
+        removePointerListeners();
+        document.removeEventListener('visibilitychange', syncPlayback);
+      };
     });
     viewChanged(document.querySelector('#viewProducts'), true);
     reduced.addEventListener('change', () => { menuContext?.revert(); menuContext = null; refresh(); });

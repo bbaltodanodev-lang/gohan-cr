@@ -31,14 +31,20 @@ locales del HTML. Las pruebas cubren el flujo de pedido, cantidades y total,
 ES/EN sin perder el producto, navegación móvil, movimiento reducido y el
 funcionamiento sin GSAP o sin almacenamiento del navegador.
 
-Las pruebas DOM no sustituyen una revisión visual en navegador. Se comprobó
-la interfaz en anchos de 320, 390, 768 y 1280 píxeles.
+Las pruebas DOM no sustituyen una revisión visual en navegador. El nuevo efecto
+3D se revisó en el navegador integrado en escritorio y en anchos de 320 y 390
+píxeles, sin desbordamiento horizontal. Esto no sustituye una prueba táctil en
+teléfonos físicos.
 
 ## Animación y publicación
 
 GSAP 3.15.0 y ScrollTrigger se sirven desde `js/vendor/`, sin depender de un CDN.
 Se usan entradas secuenciales, revelados al desplazarse y transiciones del menú.
-El paralaje de la foto principal solo se activa en escritorio con puntero preciso.
+La fotografía principal forma un panel con perspectiva CSS, sello en relieve,
+reflejo suave y flotación. Se inclina con el mouse en escritorio y con el avance
+del scroll en móvil; no es un modelo tridimensional del alimento. El símbolo del
+contacto gira suavemente al desplazarse. La flotación se pausa fuera de pantalla
+y cuando la pestaña está oculta.
 Se respeta `prefers-reduced-motion`. El scroll de rueda y táctil sigue siendo nativo.
 
 Después de actualizar la dependencia GSAP, regenerar los archivos con:

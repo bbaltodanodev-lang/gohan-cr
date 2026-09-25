@@ -95,11 +95,32 @@ test('movimiento reducido usa desplazamiento inmediato, sin animar la portada', 
   }
   ui.start();
   assert.equal(ui.window.gsap.getTweensOf(ui.$('.hero__frame')).length, 0);
+  assert.equal(ui.$('.hero__tilt').style.transform, '');
   assert.equal(ui.$('.hero__title').style.opacity, '');
   ui.click('.hero__cta a');
   assert.equal(ui.scrolls.at(-1).behavior, 'instant');
   ui.window.gsap.ticker.sleep();
 });
+
+for (const mobile of [false, true]) {
+  test(`GSAP inicia el panel 3D sin errores en ${mobile ? 'móvil' : 'escritorio'}`, async t => {
+    const ui = setup(t, { mobile });
+    for (const path of ['js/vendor/gsap.min.js', 'js/vendor/ScrollTrigger.min.js']) {
+      ui.window.eval(await readFile(new URL(path, root), 'utf8'));
+    }
+    ui.start();
+    assert.match(ui.$('.hero__tilt').style.transform, /rotate/);
+    assert.ok(ui.window.ScrollTrigger.getAll().some(trigger => trigger.trigger === ui.$('.contact')));
+    const float = ui.window.gsap.getTweensOf(ui.$('.hero__scene'))[0];
+    assert.ok(float);
+    Object.defineProperty(ui.window.document, 'hidden', { configurable: true, value: true });
+    ui.window.document.dispatchEvent(new ui.window.Event('visibilitychange'));
+    assert.equal(float.paused(), true);
+    ui.window.ScrollTrigger.killAll();
+    ui.window.gsap.globalTimeline.clear();
+    ui.window.gsap.ticker.sleep();
+  });
+}
 
 test('un idioma guardado inválido no rompe el arranque', t => {
   const ui = setup(t, { saved: 'invalid' }); ui.start();
